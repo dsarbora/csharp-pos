@@ -2,3 +2,18 @@
   width: 1000px;
   height: 500px;
 }
+
+.twoCol {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+}
+
+.table {
+  border: 1px solid black;
+  width: 200px;
+  height: 100px;
+}
+
+a {
+  text-decoration: none;
+}
