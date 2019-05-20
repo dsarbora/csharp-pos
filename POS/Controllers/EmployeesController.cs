@@ -10,7 +10,8 @@ namespace PointOfSale.Controllers
         [HttpGet("/employees")]
         public ActionResult Index()
         {
-            return View();
+            List<Table> allTables = Table.GetAll();
+            return View(allTables);
         }
     }
 }

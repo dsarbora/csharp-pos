@@ -5,11 +5,15 @@
 <h1>Employees Index Works</h1>
 <div class="twoCol">
     <div class="leftCol">
-        <a href="/orders">
+        @foreach(Table table in Model)
+        {
+            <a href="/tables/@table.GetId()">
         <div class="table">
             Orders Home
         </div>
         </a>
+        }
+        
     </div>
     <div class="rightCol">
         <button>Home</button>
