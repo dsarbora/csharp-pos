@@ -7,8 +7,12 @@ using PointOfSale.Models;
 namespace PointOfSale.Tests
 {
     [TestClass]
-    public class MenuItemTests
+    public class MenuItemTests : IDisposable
     {
+        public void Dispose()
+        {
+            MenuItem.ClearAll();
+        }
         [TestMethod]
         public void MenuItem_ReturnsCorrectName_String()
         {
@@ -55,6 +59,32 @@ namespace PointOfSale.Tests
             item.Save();
             MenuItem testItem = MenuItem.Find(item.GetId());
             Assert.AreEqual(item, testItem);
+        }
+
+        [TestMethod]
+        public void GetAll_ReturnsAllMenuItems_MenuItemList()
+        {
+            MenuItem item = new MenuItem("Chicken", 13.99f, new List<string> { "chicken" });
+            item.Save();
+            MenuItem item2 = new MenuItem("Mushrooms", 5f, new List<string> { "mushrooms" });
+            item2.Save();
+            List<MenuItem> allItems = new List<MenuItem> { item, item2 };
+            List<MenuItem> testList = MenuItem.GetAll();
+            CollectionAssert.AreEqual(allItems, testList);
+        }
+
+        [TestMethod]
+
+        public void Delete_DeletesMenuItem_ItemList()
+        {
+            MenuItem item = new MenuItem("Chicken", 13.99f, new List<string> { "chicken" });
+            item.Save();
+            MenuItem item2 = new MenuItem("Mushrooms", 5f, new List<string> { "mushrooms" });
+            item2.Save();
+            MenuItem.Delete(item2.GetId());
+            List<MenuItem> allItems = new List<MenuItem> { item };
+            List<MenuItem> testList = MenuItem.GetAll();
+            CollectionAssert.AreEqual(allItems, testList);
         }
 
     }

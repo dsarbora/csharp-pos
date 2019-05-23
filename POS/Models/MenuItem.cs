@@ -39,6 +39,35 @@ namespace PointOfSale.Models
             }
         }
 
+        public static void ClearAll()
+        {
+            MySqlConnection conn = DB.Connection();
+            conn.Open();
+            MySqlCommand cmd = conn.CreateCommand();
+            cmd.CommandText = @"DELETE FROM menu_items;";
+            cmd.ExecuteNonQuery();
+            conn.Close();
+            if (conn != null)
+            {
+                conn.Dispose();
+            }
+        }
+
+        public static void Delete(int id)
+        {
+            MySqlConnection conn = DB.Connection();
+            conn.Open();
+            MySqlCommand cmd = conn.CreateCommand();
+            cmd.CommandText = @"DELETE FROM menu_items WHERE id=@id;";
+            cmd.Parameters.Add(new MySqlParameter("@id", id));
+            cmd.ExecuteNonQuery();
+            conn.Close();
+            if (conn != null)
+            {
+                conn.Dispose();
+            }
+        }
+
         public static MenuItem Find(int id)
         {
             MySqlConnection conn = DB.Connection();
@@ -55,6 +84,34 @@ namespace PointOfSale.Models
                 price = rdr.GetFloat(2);
             }
             return new MenuItem(name, price, new List<string> { }, id);
+        }
+
+        public static List<MenuItem> GetAll()
+        {
+            List<MenuItem> allItems = new List<MenuItem> { };
+            MySqlConnection conn = DB.Connection();
+            conn.Open();
+            MySqlCommand cmd = conn.CreateCommand();
+            cmd.CommandText = @"SELECT * FROM menu_items;";
+            MySqlDataReader rdr = cmd.ExecuteReader();
+            int id = 0;
+            string name = "";
+            float price = 0f;
+            List<string> ingredients = new List<string> { };
+            while (rdr.Read())
+            {
+                id = rdr.GetInt32(0);
+                name = rdr.GetString(1);
+                price = rdr.GetFloat(2);
+                MenuItem newMenuItem = new MenuItem(name, price, ingredients, id);
+                allItems.Add(newMenuItem);
+            }
+            conn.Close();
+            if (conn != null)
+            {
+                conn.Dispose();
+            }
+            return allItems;
         }
 
         public override bool Equals(System.Object otherMenuItem)

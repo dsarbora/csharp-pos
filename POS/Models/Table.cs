@@ -6,9 +6,11 @@ namespace PointOfSale.Models
 {
     public class Table
     {
+        int CurrentOrderId;
         private int Id;
-        public Table(int id = 0)
+        public Table(int currentOrderId = -1, int id = 0)
         {
+            CurrentOrderId = currentOrderId;
             Id = id;
         }
         public int GetId()
@@ -16,12 +18,35 @@ namespace PointOfSale.Models
             return Id;
         }
 
+        public int GetCurrentOrderId()
+        {
+            return CurrentOrderId;
+        }
+
+        public void SetCurrentOrderId(int orderId)
+        {
+            MySqlConnection conn = DB.Connection();
+            conn.Open();
+            MySqlCommand cmd = conn.CreateCommand();
+            cmd.CommandText = @"UPDATE tbls SET current_order_id=@orderId WHERE id=@id;";
+            cmd.Parameters.Add(new MySqlParameter("@orderId", orderId));
+            cmd.Parameters.Add(new MySqlParameter("@id", Id));
+            cmd.ExecuteNonQuery();
+            conn.Close();
+            if (conn != null)
+            {
+                conn.Dispose();
+            }
+        }
+
+
         public void Save()
         {
             MySqlConnection conn = DB.Connection();
             conn.Open();
             MySqlCommand cmd = conn.CreateCommand();
-            cmd.CommandText = @"INSERT INTO tbls () VALUES ();";
+            cmd.CommandText = @"INSERT INTO tbls (current_order_id) VALUES (@currentOrderId);";
+            cmd.Parameters.Add(new MySqlParameter("@currentOrderId", CurrentOrderId));
             cmd.ExecuteNonQuery();
             Id = (int)cmd.LastInsertedId;
             conn.Close();
@@ -52,10 +77,12 @@ namespace PointOfSale.Models
             cmd.CommandText = @"SELECT * FROM tbls;";
             MySqlDataReader rdr = cmd.ExecuteReader();
             int id = 0;
+            int currentOrderId = 0;
             while (rdr.Read())
             {
+                currentOrderId = rdr.GetInt32(1);
                 id = rdr.GetInt32(0);
-                Table newTable = new Table(id);
+                Table newTable = new Table(currentOrderId, id);
                 allTables.Add(newTable);
             }
             conn.Close();
@@ -71,10 +98,22 @@ namespace PointOfSale.Models
             MySqlConnection conn = DB.Connection();
             conn.Open();
             MySqlCommand cmd = conn.CreateCommand();
-            cmd.CommandText = @"SELECT * FROM tables WHERE id=@id;";
+            cmd.CommandText = @"SELECT * FROM tbls WHERE id=@id;";
             cmd.Parameters.Add(new MySqlParameter("@id", id));
             MySqlDataReader rdr = cmd.ExecuteReader();
-            return new Table(id); //NEEDS TO CHANGE
+            int currentOrderId = 0;
+            while (rdr.Read())
+            {
+                currentOrderId = rdr.GetInt32(1);
+            }
+            Table newTable = new Table(currentOrderId, id);
+            conn.Close();
+            if (conn != null)
+            {
+                conn.Dispose();
+            }
+
+            return newTable;
         }
 
         public override bool Equals(System.Object otherTable)
@@ -85,7 +124,8 @@ namespace PointOfSale.Models
             }
             Table newTable = otherTable as Table;
             bool idEquality = this.GetId().Equals(newTable.GetId());
-            return idEquality;
+            bool currentOrderIdEquality = this.GetCurrentOrderId().Equals(newTable.GetCurrentOrderId());
+            return idEquality && currentOrderIdEquality;
         }
     }
 }

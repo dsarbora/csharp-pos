@@ -7,13 +7,18 @@ using PointOfSale.Models;
 namespace PointOfSale.Tests
 {
     [TestClass]
-    public class EmployeeTest
+    public class EmployeeTest : IDisposable
     {
         string employeeName = "Jacob";
         string position = "server";
         public EmployeeTest()
         {
             DBConfiguration.ConnectionString = "server=localhost;user id=root; password=root;port=8889;database=pos_test;";
+        }
+
+        public void Dispose()
+        {
+            Employee.ClearAll();
         }
         [TestMethod]
         public void Employee_HasCorrectName_String()
@@ -46,6 +51,29 @@ namespace PointOfSale.Tests
             Employee newEmployee = new Employee(employeeName, position);
             Order order = newEmployee.CreateOrder();
             Assert.IsInstanceOfType(order, typeof(Order));
+        }
+
+        [TestMethod]
+        public void GetAll_ReturnsAllEmployees_EmployeeList()
+        {
+            Employee newEmployee = new Employee(employeeName, position);
+            Employee newEmployee2 = new Employee("John", "testPosition");
+            newEmployee.Save();
+            newEmployee2.Save();
+            List<Employee> allEmployees = new List<Employee> { newEmployee, newEmployee2 };
+            List<Employee> testList = Employee.GetAll();
+            CollectionAssert.AreEqual(allEmployees, testList);
+        }
+
+        [TestMethod]
+        public void Delete_DeletesCorrectEmployee_EmployeeList()
+        {
+            Employee newEmployee = new Employee(employeeName, position);
+            newEmployee.Save();
+            Employee.Delete(newEmployee.GetId());
+            List<Employee> allEmployees = new List<Employee> { };
+            List<Employee> testList = Employee.GetAll();
+            CollectionAssert.AreEqual(allEmployees, testList);
         }
     }
 }

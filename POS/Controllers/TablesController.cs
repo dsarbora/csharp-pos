@@ -10,8 +10,16 @@ namespace PointOfSale.Controllers
         [HttpGet("/tables/{tableId}")]
         public ActionResult Show(int tableId)
         {
+            Dictionary<string, object> model = new Dictionary<string, object> { };
             Table table = Table.Find(tableId);
-            return View(table);
+            Order order = new Order();
+            if (table.GetCurrentOrderId() != -1)
+            {
+                order = Order.Find(table.GetCurrentOrderId());
+            }
+            model.Add("table", table);
+            model.Add("order", order);
+            return View(model);
         }
     }
 }

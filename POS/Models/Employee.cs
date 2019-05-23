@@ -37,6 +37,35 @@ namespace PointOfSale.Models
             }
         }
 
+        public static void Delete(int id)
+        {
+            MySqlConnection conn = DB.Connection();
+            conn.Open();
+            MySqlCommand cmd = conn.CreateCommand();
+            cmd.CommandText = @"DELETE FROM employees WHERE id=@id;";
+            cmd.Parameters.Add(new MySqlParameter("@id", id));
+            cmd.ExecuteNonQuery();
+            conn.Close();
+            if (conn != null)
+            {
+                conn.Dispose();
+            }
+        }
+
+        public static void ClearAll()
+        {
+            MySqlConnection conn = DB.Connection();
+            conn.Open();
+            MySqlCommand cmd = conn.CreateCommand();
+            cmd.CommandText = @"DELETE FROM employees;";
+            cmd.ExecuteNonQuery();
+            conn.Close();
+            if (conn != null)
+            {
+                conn.Dispose();
+            }
+        }
+
         public static Employee Find(int id)
         {
             MySqlConnection conn = DB.Connection();
@@ -60,6 +89,33 @@ namespace PointOfSale.Models
                 conn.Dispose();
             }
             return foundEmployee;
+        }
+
+        public static List<Employee> GetAll()
+        {
+            List<Employee> allEmployees = new List<Employee> { };
+            MySqlConnection conn = DB.Connection();
+            conn.Open();
+            MySqlCommand cmd = conn.CreateCommand();
+            cmd.CommandText = @"SELECT * FROM employees;";
+            MySqlDataReader rdr = cmd.ExecuteReader();
+            int id = 0;
+            string name = "";
+            string position = "";
+            while (rdr.Read())
+            {
+                id = rdr.GetInt32(0);
+                name = rdr.GetString(1);
+                position = rdr.GetString(2);
+                Employee newEmployee = new Employee(name, position, id);
+                allEmployees.Add(newEmployee);
+            }
+            conn.Close();
+            if (conn != null)
+            {
+                conn.Dispose();
+            }
+            return allEmployees;
         }
 
         public Order CreateOrder()
